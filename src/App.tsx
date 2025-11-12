@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Todo = {
   id: number;
@@ -7,20 +7,24 @@ type Todo = {
 };
 
 function App() {
-  const [title, setTitle] = useState("");
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
+  const fetchTodos = async () => {
+    const response = await fetch("http://localhost:3000/todos");
+    const data = await response.json();
+    setTodos(data.todos);
+  };
 
   const handleAddTodo = () => {
-    setTodos([
-      ...todos,
-      {
-        id: todos.length + 1,
-        title: title,
-        completed: false,
-      },
-    ]);
-
-    setTitle("");
+    if (title.trim()) {
+      setTodos([...todos, { id: todos.length + 1, title, completed: false }]);
+      setTitle("");
+    }
   };
 
   const handleToggleTodo = (id: number) => {
@@ -36,7 +40,8 @@ function App() {
       <div className="max-w-md mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-            📝 Todoアプリ!
+            
+            📝 Todoアプリ
           </h1>
 
           <div className="flex gap-2 mb-6">
@@ -47,7 +52,7 @@ function App() {
               onChange={(e) => setTitle(e.target.value)}
               placeholder="新しいタスクを入力..."
               aria-label="新しいタスクを入力"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent "
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <button
               onClick={handleAddTodo}
@@ -56,6 +61,7 @@ function App() {
               追加
             </button>
           </div>
+
           {todos.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
               <p className="text-lg">タスクがありません</p>
@@ -107,4 +113,3 @@ function App() {
 }
 
 export default App;
-
